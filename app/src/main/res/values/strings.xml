@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Balance Sheet</string>
+    <string name="action_settings">Settings</string>
+    <string name="account_name">Account Name</string>
+    <string name="account_number">Account Number</string>
+    <string name="empty_list">Add expense over here</string>
+    <string name="empty_list_account">Add account details</string>
+
+</resources>
