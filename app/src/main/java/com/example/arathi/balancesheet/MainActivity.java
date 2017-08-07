@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
 
-    private StringBuilder getDate(){
+    public static StringBuilder getCurrentDate(){
         final Calendar c = Calendar.getInstance();
         int date = c.get(Calendar.DATE);
         int month = c.get(Calendar.MONTH);
@@ -40,15 +40,18 @@ public class MainActivity extends AppCompatActivity{
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent;
+                intent = new Intent(MainActivity.this, ExpenseEdit.class);
+                startActivity(intent);
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
             }
         });
 
         TextView bankBalance = (TextView)findViewById(R.id.bank_balance);
-        String balance = "100000";
+        String balance = "Balance: 100000";
 
-        bankBalance.setText("Balance:"+ balance);
+        bankBalance.setText( balance );
         bankBalance.setOnClickListener(new View.OnClickListener() {
                                            @Override
                                            public void onClick(View v) {
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity{
                                                startActivity(intent);
                                            }
                                        } );
-        String dateToday = getDate().toString();
+        String dateToday = getCurrentDate().toString();
 
         List<ExpenseDetail> expenseDetailList = new ArrayList<>();
         expenseDetailList.add(new ExpenseDetail(1,"Temple",10,"Personal","Cash",dateToday));

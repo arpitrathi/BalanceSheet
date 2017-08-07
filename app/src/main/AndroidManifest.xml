@@ -21,6 +21,9 @@
         </activity>
         <activity android:name=".AccountDetailsImplement"
             android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".ExpenseEdit"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
