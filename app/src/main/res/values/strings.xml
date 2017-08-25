@@ -7,6 +7,13 @@
     <string name="empty_list_account">Add account details</string>
     <string name="save_expense_button">Save</string>
     <string name="date">Date</string>
+    <string name="checkIncome">Income</string>
+    <string name="accountNameHint">Add a unique Account Name</string>
+    <string name="expenseNameHint">Expense Name</string>
+    <string name="expenseAmountHint">Expense Amount</string>
+    <string name="accountNumberHint">Account Number</string>
+    <string name="accountBalance">Account Balance</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <EditText
+        android:id="@+id/accountName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:ems="10"
+        android:hint="@string/accountNameHint"
+        android:inputType="textPersonName"
+        android:text=""
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/accountNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5sp"
+        android:layout_weight="0.1"
+        android:ems="10"
+        android:hint="@string/accountNumberHint"
+        android:inputType="textPersonName"
+        android:text=""
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/accountAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5sp"
+        android:layout_weight="0.1"
+        android:ems="10"
+        android:hint="@string/accountBalance"
+        android:inputType="numberDecimal"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/saveAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10sp"
+        android:layout_weight="0.1"
+        android:onClick="addAccount"
+        android:text="@string/save_expense_button"
+        android:textAlignment="center"
+        />
+
+</LinearLayout>

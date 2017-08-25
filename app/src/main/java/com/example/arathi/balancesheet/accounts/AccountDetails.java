@@ -1,7 +1,8 @@
-package com.example.arathi.balancesheet;
+package com.example.arathi.balancesheet.accounts;
 
 /**
  * Created by arathi on 8/3/17.
+ * This file deals with creating the class for account details.
  */
 
 public class AccountDetails {
@@ -17,7 +18,7 @@ public class AccountDetails {
         accountBalance = balance;
     }
     public int getTotalBalance(){
-        return 10000;
+        return 0;
     }
     public int getaIndex(){
         return aIndex;

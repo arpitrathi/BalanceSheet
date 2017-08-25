@@ -1,7 +1,9 @@
-package com.example.arathi.balancesheet;
+package com.example.arathi.balancesheet.expense;
 
 /**
  * Created by arathi on 8/3/17.
+ * This file deals with creating the class for expense entry.
+ *
  */
 
 public class ExpenseDetail {
@@ -11,38 +13,42 @@ public class ExpenseDetail {
     private String expenseCategory;
     private String expenseMode;
     private String expenseDate;
+    private int expenseOrIncome;
 
     public ExpenseDetail( int eIndex, String eName, float eAmount, String eCategory,
-                          String eMode, String eDate){
+                          String eMode, String eDate, int eOrIn){
         expenseIndex = eIndex;
         expenseName = eName;
         amount = eAmount;
         expenseCategory = eCategory;
         expenseMode = eMode;
         expenseDate = eDate;
+        expenseOrIncome = eOrIn;
     }
 
-    public int getExpenseIndexndex() {
+    public int getExpenseIndex() {
         return expenseIndex;
     }
 
-    public String getExpenseName() {
+    String getExpenseName() {
         return expenseName;
     }
 
-    public String getExpenseCategory(){
+    String getExpenseCategory(){
         return expenseCategory;
     }
 
-    public float getAmount(){
+    float getAmount(){
         return amount;
     }
 
-    public String getExpenseMode(){
+    String getExpenseMode(){
         return expenseMode;
     }
 
-    public String getExpenseDate() {
+    String getExpenseDate() {
         return expenseDate;
     }
+
+    int getCheckIncomeOrExpense(){ return expenseOrIncome; }
 }

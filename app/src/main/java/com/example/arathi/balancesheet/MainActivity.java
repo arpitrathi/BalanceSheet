@@ -1,38 +1,59 @@
 package com.example.arathi.balancesheet;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.example.arathi.balancesheet.accounts.AccountDetailsImplement;
+import com.example.arathi.balancesheet.expense.ExpenseDetail;
+import com.example.arathi.balancesheet.expense.ExpenseDetailAdapter;
+import com.example.arathi.balancesheet.expense.ExpenseEdit;
+
 import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
 
+    public static final int READABLE_DB = 2;
+    public static final int WRITABLE_DB = 1;
+
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    public  DBHelper dbHelper;
+    TextView bankBalance;
+
     public static StringBuilder getCurrentDate(){
         final Calendar c = Calendar.getInstance();
         int date = c.get(Calendar.DATE);
         int month = c.get(Calendar.MONTH);
+        int year = c.get(Calendar.YEAR);
         StringBuilder str = new StringBuilder();
         str.append(date);
         str.append("/");
         str.append(month+1);
+        str.append("/");
+        str.append(year);
         return str;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_expense_display);
+
+        Log.d("Main","Reached Main Activity");
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -47,11 +68,16 @@ public class MainActivity extends AppCompatActivity{
                         .setAction("Action", null).show();*/
             }
         });
+        dbHelper = DBHelper.getInstance(getApplicationContext());
 
-        TextView bankBalance = (TextView)findViewById(R.id.bank_balance);
-        String balance = "Balance: 100000";
+        bankBalance = (TextView)findViewById(R.id.bank_balance);
+        String accBal = dbHelper.getAccountsBalance();
 
+        if( accBal == null)
+            accBal = "0";
+        String balance = "Balance: " + accBal;
         bankBalance.setText( balance );
+
         bankBalance.setOnClickListener(new View.OnClickListener() {
                                            @Override
                                            public void onClick(View v) {
@@ -60,20 +86,29 @@ public class MainActivity extends AppCompatActivity{
                                                startActivity(intent);
                                            }
                                        } );
-        String dateToday = getCurrentDate().toString();
+    //tv.setText(stringFromJNI());
+    }
 
-        List<ExpenseDetail> expenseDetailList = new ArrayList<>();
-        expenseDetailList.add(new ExpenseDetail(1,"Temple",10,"Personal","Cash",dateToday));
-        expenseDetailList.add(new ExpenseDetail(2,"Food",250,"Personal","HDFC CC", dateToday));
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d("DEBUG", "Reached onResume Main Activity"+bankBalance.getText().toString());
+        dbHelper = DBHelper.getInstance(getApplicationContext());
+        String accBal = dbHelper.getAccountsBalance();
+        if( accBal == null)
+            accBal = "0";
+        String balance = "Balance: " + accBal;
+        bankBalance.setText( balance );
 
+        List<ExpenseDetail> expenseDetailList = dbHelper.getExpenseList();
         ExpenseDetailAdapter expenseDetailAdapter = new ExpenseDetailAdapter(expenseDetailList,this);
-
         ListView lv = (ListView)findViewById(R.id.expense_item_list);
         lv.setAdapter(expenseDetailAdapter);
 
-    // Example of a call to a native method
-    TextView tv = (TextView) findViewById(R.id.empty_text_view);
+        // Example of a call to a native method
+        TextView tv = (TextView) findViewById(R.id.empty_text_view);
         int lenexpense = expenseDetailList.size();
+
         if(lenexpense==0){
             tv.setVisibility(View.VISIBLE);
             tv.setTextSize(30);
@@ -81,7 +116,7 @@ public class MainActivity extends AppCompatActivity{
         else{
             tv.setVisibility(View.INVISIBLE);
         }
-    //tv.setText(stringFromJNI());
+
     }
 
     @Override
@@ -111,9 +146,4 @@ public class MainActivity extends AppCompatActivity{
      * which is packaged with this application.
      */
     public native String stringFromJNI();
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
 }
