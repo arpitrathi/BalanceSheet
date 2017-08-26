@@ -1,4 +1,4 @@
-package com.example.arathi.balancesheet.accounts;
+package com.example.arathi.balancesheet.Accounts;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.example.arathi.balancesheet.R;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by arathi on 8/3/17.
@@ -65,8 +66,7 @@ class AccountDetailsAdapter extends BaseAdapter {
         }
         viewHolder.accountName.setText(accountDetails.getAccountName());
         viewHolder.accountNumber.setText(accountDetails.getAccountNumber());
-        String accBalance = Float.toString(accountDetails.getAccountBalance());
-        viewHolder.accountBalance.setText(accBalance);
+        viewHolder.accountBalance.setText(String.format(Locale.getDefault(),"%.2f",accountDetails.getAccountBalance()));
 
         return convertView;
     }

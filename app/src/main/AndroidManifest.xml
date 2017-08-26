@@ -20,14 +20,29 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".accounts.AccountDetailsImplement"
-             />
+        <activity android:name=".Accounts.AccountDetailsImplement"
+            android:parentActivityName=".Accounts.AccountEdit">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Accounts.AccountEdit"
+                />
+        </activity>
         <activity
-            android:name=".expense.ExpenseEdit"
-             />
+            android:name=".expenses.ExpenseEdit"
+            android:parentActivityName=".MainActivity"
+             >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
         <activity
-            android:name=".accounts.AccountEdit"
-             />
+            android:name=".Accounts.AccountEdit"
+            android:parentActivityName=".MainActivity"
+             >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

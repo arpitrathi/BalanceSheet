@@ -1,9 +1,12 @@
-package com.example.arathi.balancesheet.expense;
+package com.example.arathi.balancesheet.expenses;
 
 import android.app.DialogFragment;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -11,12 +14,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.example.arathi.balancesheet.Accounts.AccountDetails;
 import com.example.arathi.balancesheet.DBHelper;
-import com.example.arathi.balancesheet.MainActivity;
 import com.example.arathi.balancesheet.R;
-import com.example.arathi.balancesheet.accounts.AccountDetails;
 
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -44,8 +48,6 @@ public class ExpenseEdit extends AppCompatActivity {
     ArrayAdapter<String> adapterMode;
     ArrayAdapter<String> adapterCategory;
 
-
-
     public static void getChosenDate(int day, int month, int year) {
         String dateChosen = String.valueOf(day) + "/" +
                 String.valueOf(month) + "/" + String.valueOf(year);
@@ -53,11 +55,93 @@ public class ExpenseEdit extends AppCompatActivity {
 
     }
 
+    private StringBuilder getCurrentDate(){
+        final Calendar c = Calendar.getInstance();
+        int date = c.get(Calendar.DATE);
+        int month = c.get(Calendar.MONTH);
+        int year = c.get(Calendar.YEAR);
+        StringBuilder str = new StringBuilder();
+        str.append(date);
+        str.append("/");
+        str.append(month+1);
+        str.append("/");
+        str.append(year);
+        return str;
+    }
+
     public String[] setExpenseMode(){
         dbHelper = DBHelper.getInstance(getApplicationContext());
         List<String> accountName = dbHelper.getAccountName();
         return accountName.toArray( new String[accountName.size()] );
     }
+
+    boolean checkExpenseName(EditText expenseName){
+        if(expenseName.getText().toString().trim().length()==0) {
+            Toast.makeText(getApplicationContext(),"Add Expense Name",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+    boolean checkExpenseAmount(EditText expenseAmount){
+        String amt = expenseAmount.getText().toString();
+        if(amt.length()==0) {
+            return false;
+        }
+        if(Float.parseFloat(amt)<=0){
+            Toast.makeText(getApplicationContext(),"Enter Positive Amount",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    void watcher(final EditText expenseName, final EditText expenseAmount, final Button expenseSubmit){
+        expenseName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)){
+                    expenseSubmit.setEnabled(true);
+                    expenseSubmit.setBackgroundColor(Color.GREEN);
+                } else {
+                    expenseSubmit.setEnabled(false);
+                    expenseSubmit.setBackgroundColor(Color.GRAY);
+
+                }
+            }
+        });
+        expenseAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)){
+                    expenseSubmit.setEnabled(true);
+                    expenseSubmit.setBackgroundColor(Color.GREEN);
+                } else {
+                    expenseSubmit.setEnabled(false);
+                    expenseSubmit.setBackgroundColor(Color.GRAY);
+                }
+            }
+        });
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         Log.d(DEBUG_TAG,"Reached Oncreate");
@@ -75,8 +159,11 @@ public class ExpenseEdit extends AppCompatActivity {
         expenseAmount = (EditText)findViewById(R.id.expenseAmount);
         incomeOrNot = (CheckBox)findViewById(R.id.expenseOrIncome);
         expenseDate = (Button)findViewById(R.id.expenseDate);
-        expenseDate.setText(MainActivity.getCurrentDate());
+        expenseDate.setText(getCurrentDate());
         expenseSubmit = (Button)findViewById(R.id.expenseSubmit);
+        expenseSubmit.setEnabled(false);
+        expenseSubmit.setBackgroundColor(Color.GRAY);
+        watcher(expenseName,expenseAmount,expenseSubmit);
 
 
     }
@@ -105,7 +192,7 @@ public class ExpenseEdit extends AppCompatActivity {
 
         Log.d(DEBUG_TAG,"Reached Button Clicer for saving");
         String name = expenseName.getText().toString().trim();
-        if(name.length()==0 ){
+        if(!checkExpenseName(expenseName)){
             submit = false;
             Snackbar.make(v, " Enter Expense name", Snackbar.LENGTH_SHORT).setAction("",null).show();
         }
@@ -114,7 +201,7 @@ public class ExpenseEdit extends AppCompatActivity {
         String category = expenseCategory.getSelectedItem().toString();
         String date = expenseDate.getText().toString();
         String amt = expenseAmount.getText().toString();
-        if(amt.length()==0){
+        if(!checkExpenseAmount(expenseAmount)){
             submit = false;
             Snackbar.make(v, " Add amount", Snackbar.LENGTH_SHORT).setAction("",null).show();
 

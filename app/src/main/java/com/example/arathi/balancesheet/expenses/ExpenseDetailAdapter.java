@@ -1,6 +1,5 @@
-package com.example.arathi.balancesheet.expense;
+package com.example.arathi.balancesheet.expenses;
 
-import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -51,12 +50,10 @@ public class ExpenseDetailAdapter extends BaseAdapter {
         ExpenseViewHolder mViewHolder ;
         final ExpenseDetail expenseDetail = expenseDetailList.get(position);
         if(convertView==null) {
-            mViewHolder = new ExpenseViewHolder();
-            AccessibilityService activity;
 
+            mViewHolder = new ExpenseViewHolder();
             convertView = LayoutInflater.from(context).inflate(
                     R.layout.expense_details, parent, false);
-
 
             mViewHolder.expenseName = (TextView) convertView.findViewById(R.id.expenseName);
             mViewHolder.expenseDate = (TextView) convertView.findViewById(R.id.expenseDate);
@@ -72,7 +69,7 @@ public class ExpenseDetailAdapter extends BaseAdapter {
         mViewHolder.expenseMode.setText(expenseDetail.getExpenseMode());
         mViewHolder.expenseMode.setVisibility(View.INVISIBLE);
         mViewHolder.expenseDate.setText(expenseDetail.getExpenseDate());
-        mViewHolder.expenseAmount.setText(String.format(Locale.getDefault(),"%f",expenseDetail.getAmount()));
+        mViewHolder.expenseAmount.setText(String.format(Locale.getDefault(),"%.2f",expenseDetail.getAmount()));
         mViewHolder.expenseCategory.setText(expenseDetail.getExpenseCategory());
         mViewHolder.expenseCategory.setVisibility(View.INVISIBLE);
         mViewHolder.expenseAmount.setTextSize(20);

@@ -1,4 +1,4 @@
-package com.example.arathi.balancesheet.expense;
+package com.example.arathi.balancesheet.expenses;
 
 /**
  * Created by arathi on 8/3/17.

@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.example.arathi.balancesheet.accounts.AccountDetails;
-import com.example.arathi.balancesheet.expense.ExpenseDetail;
+import com.example.arathi.balancesheet.Accounts.AccountDetails;
+import com.example.arathi.balancesheet.expenses.ExpenseDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -327,15 +327,15 @@ public class DBHelper extends SQLiteOpenHelper {
         return  item;
     }
 
-    String getAccountsBalance(){
+    float getAccountsBalance(){
         SQLiteDatabase db = this.getReadableDatabase();
 
 
         Cursor rs = db.rawQuery("select sum( "+ AccountEntry.COLUMN_NAME3+" ) as balance from "+ AccountEntry.TABLE_NAME, null );
 
-        String balance = "0";
+        float balance = 0;
         if(rs.moveToFirst()) {
-        balance = rs.getString(0);
+        balance = rs.getFloat(0);
         }
 
         return balance;

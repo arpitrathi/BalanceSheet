@@ -12,13 +12,13 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.arathi.balancesheet.accounts.AccountDetailsImplement;
-import com.example.arathi.balancesheet.expense.ExpenseDetail;
-import com.example.arathi.balancesheet.expense.ExpenseDetailAdapter;
-import com.example.arathi.balancesheet.expense.ExpenseEdit;
+import com.example.arathi.balancesheet.Accounts.AccountDetailsImplement;
+import com.example.arathi.balancesheet.expenses.ExpenseDetail;
+import com.example.arathi.balancesheet.expenses.ExpenseDetailAdapter;
+import com.example.arathi.balancesheet.expenses.ExpenseEdit;
 
-import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -33,19 +33,6 @@ public class MainActivity extends AppCompatActivity{
     public  DBHelper dbHelper;
     TextView bankBalance;
 
-    public static StringBuilder getCurrentDate(){
-        final Calendar c = Calendar.getInstance();
-        int date = c.get(Calendar.DATE);
-        int month = c.get(Calendar.MONTH);
-        int year = c.get(Calendar.YEAR);
-        StringBuilder str = new StringBuilder();
-        str.append(date);
-        str.append("/");
-        str.append(month+1);
-        str.append("/");
-        str.append(year);
-        return str;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +58,9 @@ public class MainActivity extends AppCompatActivity{
         dbHelper = DBHelper.getInstance(getApplicationContext());
 
         bankBalance = (TextView)findViewById(R.id.bank_balance);
-        String accBal = dbHelper.getAccountsBalance();
+        float accBal = dbHelper.getAccountsBalance();
 
-        if( accBal == null)
-            accBal = "0";
-        String balance = "Balance: " + accBal;
+        String balance = "Balance: " + String.format(Locale.getDefault(),"%.2f",accBal);
         bankBalance.setText( balance );
 
         bankBalance.setOnClickListener(new View.OnClickListener() {
@@ -94,10 +79,8 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         Log.d("DEBUG", "Reached onResume Main Activity"+bankBalance.getText().toString());
         dbHelper = DBHelper.getInstance(getApplicationContext());
-        String accBal = dbHelper.getAccountsBalance();
-        if( accBal == null)
-            accBal = "0";
-        String balance = "Balance: " + accBal;
+        float accBal = dbHelper.getAccountsBalance();
+        String balance = "Balance: " + String.format(Locale.getDefault(),"%.2f",accBal);
         bankBalance.setText( balance );
 
         List<ExpenseDetail> expenseDetailList = dbHelper.getExpenseList();

@@ -1,4 +1,4 @@
-package com.example.arathi.balancesheet.accounts;
+package com.example.arathi.balancesheet.Accounts;
 
 import android.content.Intent;
 import android.os.Bundle;

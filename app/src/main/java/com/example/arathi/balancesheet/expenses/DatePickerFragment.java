@@ -1,4 +1,4 @@
-package com.example.arathi.balancesheet.expense;
+package com.example.arathi.balancesheet.expenses;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -7,8 +7,9 @@ import android.os.Bundle;
 import android.widget.DatePicker;
 
 import java.util.Calendar;
+import java.util.Date;
 
-import static com.example.arathi.balancesheet.expense.ExpenseEdit.getChosenDate;
+import static com.example.arathi.balancesheet.expenses.ExpenseEdit.getChosenDate;
 
 //import static com.example.arathi.balancesheet.Expense.ExpenseEdit.showDate;
 
@@ -27,7 +28,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
         // Create a new instance of DatePickerDialog and return it
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
+        datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
+        return datePickerDialog;
 
     }
 
