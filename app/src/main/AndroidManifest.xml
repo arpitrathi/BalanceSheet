@@ -21,14 +21,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".Accounts.AccountDetailsImplement"
-            android:parentActivityName=".Accounts.AccountEdit">
+            android:label="@string/app_account_details"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Accounts.AccountEdit"
+                android:value=".MainActivity"
                 />
         </activity>
         <activity
             android:name=".expenses.ExpenseEdit"
+            android:label="@string/app_expense_add"
             android:parentActivityName=".MainActivity"
              >
             <meta-data
@@ -37,11 +39,12 @@
         </activity>
         <activity
             android:name=".Accounts.AccountEdit"
-            android:parentActivityName=".MainActivity"
+            android:label="@string/app_account_add"
+            android:parentActivityName=".Accounts.AccountDetailsImplement"
              >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".Accounts.AccountDetailsImplement"/>
         </activity>
     </application>
 

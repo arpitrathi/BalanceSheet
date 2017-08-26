@@ -40,12 +40,12 @@
                 android:layout_height="match_parent" />
 
             <TextView
-                android:id="@+id/empty_text_view2"
+                android:id="@+id/empty_text_view_account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/empty_list_account"
                 android:textSize="40sp"
-                android:visibility="invisible" />
+                android:visibility="gone" />
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton

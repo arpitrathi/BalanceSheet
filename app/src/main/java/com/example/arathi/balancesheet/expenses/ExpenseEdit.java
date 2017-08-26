@@ -94,6 +94,9 @@ public class ExpenseEdit extends AppCompatActivity {
         return true;
     }
 
+    boolean checkExpenseMode(Spinner expenseMode){
+        return expenseMode.getAdapter().getCount() != 0;
+    }
     void watcher(final EditText expenseName, final EditText expenseAmount, final Button expenseSubmit){
         expenseName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -108,9 +111,15 @@ public class ExpenseEdit extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)){
-                    expenseSubmit.setEnabled(true);
-                    expenseSubmit.setBackgroundColor(Color.GREEN);
+                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount) ){
+                    if( checkExpenseMode(expenseMode)){
+                        expenseSubmit.setEnabled(true);
+                        expenseSubmit.setBackgroundColor(Color.GREEN); }
+                    else {
+                        Toast.makeText(getApplicationContext(),"Add account details first",Toast.LENGTH_SHORT).show();
+                        expenseSubmit.setEnabled(false);
+                        expenseSubmit.setBackgroundColor(Color.GRAY);
+                    }
                 } else {
                     expenseSubmit.setEnabled(false);
                     expenseSubmit.setBackgroundColor(Color.GRAY);
@@ -131,10 +140,17 @@ public class ExpenseEdit extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)){
-                    expenseSubmit.setEnabled(true);
-                    expenseSubmit.setBackgroundColor(Color.GREEN);
-                } else {
+                if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)) {
+                    if (checkExpenseMode(expenseMode)) {
+                        expenseSubmit.setEnabled(true);
+                        expenseSubmit.setBackgroundColor(Color.GREEN);
+                    } else {
+                        expenseSubmit.setEnabled(false);
+                        expenseSubmit.setBackgroundColor(Color.GRAY);
+                        Toast.makeText(getApplicationContext(), "Add account details first", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else {
                     expenseSubmit.setEnabled(false);
                     expenseSubmit.setBackgroundColor(Color.GRAY);
                 }
@@ -189,15 +205,19 @@ public class ExpenseEdit extends AppCompatActivity {
 
     public void setExpenseSubmit(View v){
         boolean submit = true;
-
+        String mode = "";
         Log.d(DEBUG_TAG,"Reached Button Clicer for saving");
         String name = expenseName.getText().toString().trim();
         if(!checkExpenseName(expenseName)){
             submit = false;
             Snackbar.make(v, " Enter Expense name", Snackbar.LENGTH_SHORT).setAction("",null).show();
         }
+        if(!checkExpenseMode(expenseMode)){
+            submit=false;
 
-        String mode = expenseMode.getSelectedItem().toString();
+        } else {
+           mode = expenseMode.getSelectedItem().toString();
+        }
         String category = expenseCategory.getSelectedItem().toString();
         String date = expenseDate.getText().toString();
         String amt = expenseAmount.getText().toString();
@@ -206,6 +226,7 @@ public class ExpenseEdit extends AppCompatActivity {
             Snackbar.make(v, " Add amount", Snackbar.LENGTH_SHORT).setAction("",null).show();
 
         }
+
         float amount=0;
 
         boolean incOrNot =  incomeOrNot.isChecked();

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.arathi.balancesheet.DBHelper;
 import com.example.arathi.balancesheet.R;
@@ -18,6 +19,7 @@ public class AccountDetailsImplement extends AppCompatActivity {
     List<AccountDetails> accountDetails;
     ListView lv;
     AccountDetailsAdapter accountDetailsAdapter;
+    TextView emptyAccount;
     private DBHelper dbHelper;
 
     private void setAccountDetails(){
@@ -29,6 +31,13 @@ public class AccountDetailsImplement extends AppCompatActivity {
             lv = (ListView)findViewById(R.id.account_detail);
             accountDetailsAdapter = new AccountDetailsAdapter(accountDetails, this);    
             lv.setAdapter(accountDetailsAdapter);
+            if(accountDetails.size()==0){
+
+                emptyAccount.setVisibility(View.VISIBLE);
+            }
+            else {
+                emptyAccount.setVisibility(View.GONE);
+            }
             dbHelper.close();
         }catch (Exception e){
             Log.e("Error",e.getMessage());
@@ -51,6 +60,8 @@ public class AccountDetailsImplement extends AppCompatActivity {
         }
         );
         setAccountDetails();
+        emptyAccount = (TextView)findViewById(R.id.empty_text_view_account);
+        emptyAccount.setVisibility(View.GONE);
 
     }
 

@@ -72,19 +72,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(EXPENSE_TABLE);
         db.execSQL(ACCOUNTS_TABLE);
 
-        ContentValues value = new ContentValues();
-        value.put(ExpenseEntry.COLUMN_NAME1, "Paan");
-        value.put(ExpenseEntry.COLUMN_NAME2, 100);
-        value.put(ExpenseEntry.COLUMN_NAME3, "Personal");
-        value.put(ExpenseEntry.COLUMN_NAME4, "Cash");
-        value.put(ExpenseEntry.COLUMN_NAME5,"12/08/2017");
-        value.put(ExpenseEntry.COLUMN_NAME6, false);
-        long newRowId = db.insert(ExpenseEntry.TABLE_NAME,null,value);
-        ContentValues value1  = new ContentValues();
-        value1.put(AccountEntry.COLUMN_NAME1,"Cash");
-        value1.put(AccountEntry.COLUMN_NAME2, "NA");
-        value1.put(AccountEntry.COLUMN_NAME3, 1000);
-        long newRow = db.insert(AccountEntry.TABLE_NAME,null,value1);
+
 
     }
 
@@ -164,9 +152,6 @@ public class DBHelper extends SQLiteOpenHelper {
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_ID_NAME));
             int checkinc = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME6));
 
-
-            // TODO: update this item based on data fetched from database. Added an income checkbox
-            // TODO: to identify whether the entered transaction is an expense or income
 
             ExpenseDetail item = new ExpenseDetail(id, name, amount, category, mode, date, checkinc) ;
             items.add(item);
