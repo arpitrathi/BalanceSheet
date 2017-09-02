@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -16,14 +17,18 @@ import com.example.arathi.balancesheet.Accounts.AccountDetailsImplement;
 import com.example.arathi.balancesheet.expenses.ExpenseDetail;
 import com.example.arathi.balancesheet.expenses.ExpenseDetailAdapter;
 import com.example.arathi.balancesheet.expenses.ExpenseEdit;
+import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity{
 
-    public static final int READABLE_DB = 2;
-    public static final int WRITABLE_DB = 1;
+
+    public static final String EXPENSE_TYPE = "expense_type";
+    public static final int  EXPENSE_UPDATE = 2;
+    public static final int EXPENSE_ADD = 1;
+    public static final String EXPENSE_DATA = "expense_data";
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -32,7 +37,8 @@ public class MainActivity extends AppCompatActivity{
 
     public  DBHelper dbHelper;
     TextView bankBalance;
-
+    TextView expenseBalance;
+    ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,7 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View view) {
                 Intent intent;
                 intent = new Intent(MainActivity.this, ExpenseEdit.class);
+                intent.putExtra(EXPENSE_TYPE,EXPENSE_ADD);
                 startActivity(intent);
                 /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
@@ -58,10 +65,7 @@ public class MainActivity extends AppCompatActivity{
         dbHelper = DBHelper.getInstance(getApplicationContext());
 
         bankBalance = (TextView)findViewById(R.id.bank_balance);
-        float accBal = dbHelper.getAccountsBalance();
-
-        String balance = "Balance: " + String.format(Locale.getDefault(),"%.2f",accBal);
-        bankBalance.setText( balance );
+        expenseBalance = (TextView) findViewById(R.id.expense_balance);
 
         bankBalance.setOnClickListener(new View.OnClickListener() {
                                            @Override
@@ -71,6 +75,19 @@ public class MainActivity extends AppCompatActivity{
                                                startActivity(intent);
                                            }
                                        } );
+        lv = (ListView)findViewById(R.id.expense_item_list);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ExpenseDetail expenseDetail = (ExpenseDetail) parent.getItemAtPosition(position);
+                Intent intent = new Intent(MainActivity.this, ExpenseEdit.class);
+                String expenseString = (new Gson()).toJson(expenseDetail);
+                intent.putExtra(EXPENSE_TYPE,EXPENSE_UPDATE);
+                intent.putExtra(EXPENSE_DATA,expenseString);
+                startActivity(intent);
+
+            }
+        });
     //tv.setText(stringFromJNI());
     }
 
@@ -79,13 +96,16 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         Log.d("DEBUG", "Reached onResume Main Activity"+bankBalance.getText().toString());
         dbHelper = DBHelper.getInstance(getApplicationContext());
+        float totalExpense = dbHelper.getTotalExpense();
         float accBal = dbHelper.getAccountsBalance();
-        String balance = "Balance: " + String.format(Locale.getDefault(),"%.2f",accBal);
-        bankBalance.setText( balance );
+
+        String accbalance = "Accounts Balance: " + String.format(Locale.getDefault(),"%.2f",accBal);
+        String expenseBal = "Total Expense: " +String.format(Locale.getDefault(),"%.2f",totalExpense);
+        expenseBalance.setText( expenseBal );
+        bankBalance.setText( accbalance );
 
         List<ExpenseDetail> expenseDetailList = dbHelper.getExpenseList();
         ExpenseDetailAdapter expenseDetailAdapter = new ExpenseDetailAdapter(expenseDetailList,this);
-        ListView lv = (ListView)findViewById(R.id.expense_item_list);
         lv.setAdapter(expenseDetailAdapter);
 
         // Example of a call to a native method
@@ -119,6 +139,10 @@ public class MainActivity extends AppCompatActivity{
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        else if(id == R.id.account_all){
+            Intent intent = new Intent(MainActivity.this, AccountDetailsImplement.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);

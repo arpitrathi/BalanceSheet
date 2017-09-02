@@ -67,7 +67,7 @@ public class ExpenseDetailAdapter extends BaseAdapter {
         }
         mViewHolder.expenseName.setText(expenseDetail.getExpenseName());
         mViewHolder.expenseMode.setText(expenseDetail.getExpenseMode());
-        mViewHolder.expenseMode.setVisibility(View.INVISIBLE);
+        //mViewHolder.expenseMode.setVisibility(View.INVISIBLE);
         mViewHolder.expenseDate.setText(expenseDetail.getExpenseDate());
         mViewHolder.expenseAmount.setText(String.format(Locale.getDefault(),"%.2f",expenseDetail.getAmount()));
         mViewHolder.expenseCategory.setText(expenseDetail.getExpenseCategory());

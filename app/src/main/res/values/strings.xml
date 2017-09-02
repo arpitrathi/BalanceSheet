@@ -17,6 +17,7 @@
     <string name="app_expense_add">Add Expense</string>
     <string name="app_account_details">Accounts</string>
 
+    <string name="account">Accounts</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

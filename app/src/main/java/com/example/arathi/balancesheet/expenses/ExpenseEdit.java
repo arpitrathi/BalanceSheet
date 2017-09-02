@@ -1,6 +1,7 @@
 package com.example.arathi.balancesheet.expenses;
 
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -18,10 +19,13 @@ import android.widget.Toast;
 
 import com.example.arathi.balancesheet.Accounts.AccountDetails;
 import com.example.arathi.balancesheet.DBHelper;
+import com.example.arathi.balancesheet.MainActivity;
 import com.example.arathi.balancesheet.R;
+import com.google.gson.Gson;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -33,6 +37,8 @@ public class ExpenseEdit extends AppCompatActivity {
 
 
 
+    final static String update = "Update";
+    final static String save = "Save";
     static Button expenseDate;
     String DEBUG_TAG = "ExpenseEdit";
     Spinner expenseMode;
@@ -41,10 +47,11 @@ public class ExpenseEdit extends AppCompatActivity {
     EditText expenseAmount;
     Button expenseSubmit;
     DBHelper dbHelper;
-
+    int type_expense;
     CheckBox incomeOrNot;
     String[] expenseCat;
     String[] expenseMod;
+    int expenseIndex;
     ArrayAdapter<String> adapterMode;
     ArrayAdapter<String> adapterCategory;
 
@@ -175,12 +182,46 @@ public class ExpenseEdit extends AppCompatActivity {
         expenseAmount = (EditText)findViewById(R.id.expenseAmount);
         incomeOrNot = (CheckBox)findViewById(R.id.expenseOrIncome);
         expenseDate = (Button)findViewById(R.id.expenseDate);
-        expenseDate.setText(getCurrentDate());
+
         expenseSubmit = (Button)findViewById(R.id.expenseSubmit);
         expenseSubmit.setEnabled(false);
         expenseSubmit.setBackgroundColor(Color.GRAY);
-        watcher(expenseName,expenseAmount,expenseSubmit);
 
+        expenseDate.setText(getCurrentDate());
+        try {
+            expenseMod = setExpenseMode();
+            adapterMode = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, expenseMod);
+            expenseMode.setAdapter(adapterMode);
+        }catch (Exception e){
+            Log.d(DEBUG_TAG,e.getMessage());
+        }
+
+        watcher(expenseName,expenseAmount,expenseSubmit);
+        Intent intent = getIntent();
+        type_expense = intent.getIntExtra(MainActivity.EXPENSE_TYPE,0);
+        if(type_expense==MainActivity.EXPENSE_UPDATE){
+            String expense_entry = intent.getStringExtra(MainActivity.EXPENSE_DATA);
+            ExpenseDetail expenseDetail = (new Gson()).fromJson(expense_entry,ExpenseDetail.class);
+            expenseName.setText(expenseDetail.getExpenseName());
+            String expenseBalance = String.format(Locale.getDefault(),"%.2f",expenseDetail.getAmount());
+            expenseAmount.setText(expenseBalance);
+            String expenseModeCompare = expenseDetail.getExpenseMode();
+            int spinnerPosition = adapterMode.getPosition(expenseModeCompare);
+            expenseMode.setSelection(spinnerPosition);
+            String expenseCategoryCompare = expenseDetail.getExpenseCategory();
+            spinnerPosition = adapterCategory.getPosition(expenseCategoryCompare);
+            expenseCategory.setSelection(spinnerPosition);
+            expenseDate.setText(expenseDetail.getExpenseDate());
+            int incornot = expenseDetail.getCheckIncomeOrExpense();
+            if (incornot==1){
+                incomeOrNot.setChecked(true);
+            }
+            expenseIndex = expenseDetail.getExpenseIndex();
+            expenseSubmit.setText(update);
+        }
+        else {
+            expenseSubmit.setText(save);
+        }
 
     }
     @Override
@@ -188,21 +229,13 @@ public class ExpenseEdit extends AppCompatActivity {
 
         Log.d(DEBUG_TAG,"Rechaed OnResume");
         super.onResume();
-
-        try {
-            expenseMod = setExpenseMode();
-        }catch (Exception e){
-            Log.d(DEBUG_TAG,e.getMessage());
-        }
-
-        try {
-            adapterMode = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, expenseMod);
-            expenseMode.setAdapter(adapterMode);
-        }catch (Exception e) {
-            Log.e("Error",e.getMessage());
-        }
     }
 
+    private void setAccount(AccountDetails account, float amount){
+        dbHelper = DBHelper.getInstance(getApplicationContext());
+        dbHelper.updateAccount(account.getaIndex(), account.getAccountName(), account.getAccountNumber(), amount);
+
+    }
     public void setExpenseSubmit(View v){
         boolean submit = true;
         String mode = "";
@@ -246,20 +279,40 @@ public class ExpenseEdit extends AppCompatActivity {
             }
 
             try {
+
                 dbHelper = DBHelper.getInstance(getApplicationContext());
-
+                AccountDetails newAccount = dbHelper.getAccountEntry(mode);
+                if(type_expense==MainActivity.EXPENSE_ADD){
                 dbHelper.insertExpense(name, amount, category, mode, date, check);
-
-                AccountDetails account = dbHelper.getAccountEntry(mode);
-                if (check == 0) {
-                    float balance = account.getAccountBalance() - amount;
-                    dbHelper.updateAccount(account.getaIndex(), account.getAccountName(), account.getAccountNumber(), balance);
-                } else {
-                    float balance = account.getAccountBalance() + amount;
-                    dbHelper.updateAccount(account.getaIndex(), account.getAccountName(), account.getAccountNumber(), balance);
-
+                    if (check == 0) {
+                        float balance = newAccount.getAccountBalance() - amount;
+                        setAccount(newAccount,balance);
+                    } else {
+                        float balance = newAccount.getAccountBalance() + amount;
+                        setAccount(newAccount,balance);
+                    }
+                } else{
+                    ExpenseDetail expenseDetail = dbHelper.getExpenseDetail(expenseIndex);
+                    AccountDetails previousAccount = dbHelper.getAccountEntry(expenseDetail.getExpenseMode());
+                    float previousExpenseAmount = expenseDetail.getAmount();
+                    int previouslyIncomeOrNot = expenseDetail.getCheckIncomeOrExpense();
+                    float diff;
+                    float newAmount;
+                    float accountBalance = newAccount.getAccountBalance();
+                    float prevAccountBalance = previousAccount.getAccountBalance();
+                        if (previouslyIncomeOrNot == 0)
+                            newAmount = prevAccountBalance + previousExpenseAmount;
+                        else
+                            newAmount = prevAccountBalance - previousExpenseAmount;
+                        setAccount(previousAccount, newAmount);
+                    newAccount = dbHelper.getAccountEntry(newAccount.getAccountName());
+                    if (check == 0)
+                        newAmount = newAccount.getAccountBalance() - amount;
+                    else
+                        newAmount= newAccount.getAccountBalance() + amount;
+                    setAccount(newAccount,newAmount);
+                    dbHelper.updateExpense(expenseIndex,name, amount, category, mode, date, check);
                 }
-
                 Snackbar.make(v, "Expense Added", Snackbar.LENGTH_SHORT).setAction("", null).show();
                 finish();
             } catch (Exception e) {

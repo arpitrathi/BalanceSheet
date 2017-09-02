@@ -71,9 +71,6 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.d("Database","Reached onCreate for DBHelper");
         db.execSQL(EXPENSE_TABLE);
         db.execSQL(ACCOUNTS_TABLE);
-
-
-
     }
 
     @Override
@@ -174,6 +171,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 AccountEntry.COLUMN_NAME3
         };
 
+        String sortedOrder =AccountEntry.COLUMN_NAME1 +" ASC";
         Cursor cursor = db.query(
                 AccountEntry.TABLE_NAME,
                 projection,
@@ -181,7 +179,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
-                null
+                sortedOrder
         );
 
         List<AccountDetails> items = new ArrayList<>();
@@ -312,11 +310,12 @@ public class DBHelper extends SQLiteOpenHelper {
         return  item;
     }
 
-    float getAccountsBalance(){
+    public float getAccountsBalance(){
         SQLiteDatabase db = this.getReadableDatabase();
 
 
-        Cursor rs = db.rawQuery("select sum( "+ AccountEntry.COLUMN_NAME3+" ) as balance from "+ AccountEntry.TABLE_NAME, null );
+        Cursor rs = db.rawQuery("select sum( "+ AccountEntry.COLUMN_NAME3+" ) as balance from "
+                + AccountEntry.TABLE_NAME, null );
 
         float balance = 0;
         if(rs.moveToFirst()) {
@@ -326,7 +325,82 @@ public class DBHelper extends SQLiteOpenHelper {
         return balance;
     }
 
+    public float getTotalExpense(){
+        SQLiteDatabase db = this.getReadableDatabase();
 
 
+        Cursor rs = db.rawQuery("select sum ( "+ExpenseEntry.COLUMN_NAME2+ " ) as totalE from "
+                +ExpenseEntry.TABLE_NAME + " where "+ExpenseEntry.COLUMN_NAME6+" = 0", null);
+        float totalExpense = 0;
+        if(rs.moveToFirst()){
+            totalExpense = rs.getFloat(0);
+        }
+        return totalExpense;
+    }
+
+    public float getTotalIncome(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor rs = db.rawQuery("select sum ( "+ExpenseEntry.COLUMN_NAME2+ " ) as totalE from "
+                +ExpenseEntry.TABLE_NAME + "where "+ExpenseEntry.COLUMN_NAME6+" = 1", null);
+        float totalExpense = 0;
+        if(rs.moveToFirst()){
+            totalExpense = rs.getFloat(0);
+        }
+        return totalExpense;
+
+    }
+    public float getExpenseAmount(int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor rs = db.rawQuery("select "+ExpenseEntry.COLUMN_NAME2+" from "+ExpenseEntry.TABLE_NAME+
+                " where "+ExpenseEntry.COLUMN_ID_NAME+ " = "+ Integer.toString(id), null);
+        float expense = 0;
+        if(rs.moveToFirst()){
+            expense = rs.getFloat(0);
+        }
+        return expense;
+
+    }
+    public ExpenseDetail getExpenseDetail(int id){
+        float amount;
+        String name;
+        String category, mode;
+        int incornot;
+        String date;
+
+        String[] projection = {
+                ExpenseEntry.COLUMN_ID_NAME,
+                ExpenseEntry.COLUMN_NAME1,
+                ExpenseEntry.COLUMN_NAME2,
+                ExpenseEntry.COLUMN_NAME3,
+                ExpenseEntry.COLUMN_NAME4,
+                ExpenseEntry.COLUMN_NAME5,
+                ExpenseEntry.COLUMN_NAME6
+        };
+       String selection = ExpenseEntry.COLUMN_ID_NAME + " = ?";
+        String[] selectionArgs = {
+                Integer.toString(id)
+        };
+
+        Cursor cursor = db.query(
+                ExpenseEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+        ExpenseDetail expenseDetail = null;
+        if(cursor.moveToFirst()){
+            amount= cursor.getFloat(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME2));
+            name = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME1));
+            category = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME3));
+            mode = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME4));
+            date = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME5));
+            incornot = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME6));
+            expenseDetail = new ExpenseDetail(id,name,amount,category,mode,date,incornot);
+        }
+        return expenseDetail;
+    }
 
 }
