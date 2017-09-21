@@ -66,7 +66,8 @@ class AccountDetailsAdapter extends BaseAdapter {
         }
         viewHolder.accountName.setText(accountDetails.getAccountName());
         viewHolder.accountNumber.setText(accountDetails.getAccountNumber());
-        viewHolder.accountBalance.setText(String.format(Locale.getDefault(),"%.2f",accountDetails.getAccountBalance()));
+        viewHolder.accountBalance.setText(String.format(Locale.getDefault(),
+                "%.2f", accountDetails.getAccountBalance()));
 
         return convertView;
     }

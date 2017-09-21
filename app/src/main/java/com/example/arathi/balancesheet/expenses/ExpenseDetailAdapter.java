@@ -30,6 +30,7 @@ public class ExpenseDetailAdapter extends BaseAdapter {
         numItems = items.size();
     }
 
+
     @Override
     public int getCount() {
         return numItems;
@@ -59,15 +60,15 @@ public class ExpenseDetailAdapter extends BaseAdapter {
             mViewHolder.expenseDate = (TextView) convertView.findViewById(R.id.expenseDate);
             mViewHolder.expenseAmount = (TextView) convertView.findViewById(R.id.expenseAmount);
             mViewHolder.expenseCategory = (TextView) convertView.findViewById(R.id.expenseCategory);
-            mViewHolder.expenseMode = (TextView) convertView.findViewById(R.id.expenseMode);
+            mViewHolder.expenseAccount = (TextView) convertView.findViewById(R.id.expenseAccount);
 
             convertView.setTag(mViewHolder);
         } else {
             mViewHolder = (ExpenseViewHolder) convertView.getTag();
         }
         mViewHolder.expenseName.setText(expenseDetail.getExpenseName());
-        mViewHolder.expenseMode.setText(expenseDetail.getExpenseMode());
-        //mViewHolder.expenseMode.setVisibility(View.INVISIBLE);
+        mViewHolder.expenseAccount.setText(expenseDetail.getAccountName());
+        //mViewHolder.expenseAccount.setVisibility(View.INVISIBLE);
         mViewHolder.expenseDate.setText(expenseDetail.getExpenseDate());
         mViewHolder.expenseAmount.setText(String.format(Locale.getDefault(),"%.2f",expenseDetail.getAmount()));
         mViewHolder.expenseCategory.setText(expenseDetail.getExpenseCategory());
@@ -89,6 +90,6 @@ public class ExpenseDetailAdapter extends BaseAdapter {
         private TextView expenseDate;
         private TextView expenseAmount;
         private TextView expenseCategory;
-        private TextView expenseMode;
+        private TextView expenseAccount;
     }
 }

@@ -18,11 +18,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.arathi.balancesheet.Accounts.AccountDetails;
+import com.example.arathi.balancesheet.Accounts.AccountDetails.AccountId;
 import com.example.arathi.balancesheet.DBHelper;
 import com.example.arathi.balancesheet.MainActivity;
 import com.example.arathi.balancesheet.R;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -41,7 +43,7 @@ public class ExpenseEdit extends AppCompatActivity {
     final static String save = "Save";
     static Button expenseDate;
     String DEBUG_TAG = "ExpenseEdit";
-    Spinner expenseMode;
+    Spinner expenseAccount;
     Spinner expenseCategory;
     EditText expenseName;
     EditText expenseAmount;
@@ -50,11 +52,11 @@ public class ExpenseEdit extends AppCompatActivity {
     int type_expense;
     CheckBox incomeOrNot;
     String[] expenseCat;
-    String[] expenseMod;
+    String[] expenseAcc;
     int expenseIndex;
-    ArrayAdapter<String> adapterMode;
+    ArrayAdapter<String> adapterAccountMode;
     ArrayAdapter<String> adapterCategory;
-
+    List<AccountId> accountIdList;
     public static void getChosenDate(int day, int month, int year) {
         String dateChosen = String.valueOf(day) + "/" +
                 String.valueOf(month) + "/" + String.valueOf(year);
@@ -76,9 +78,36 @@ public class ExpenseEdit extends AppCompatActivity {
         return str;
     }
 
-    public String[] setExpenseMode(){
+    int getAccountIdFromName(String accountName) {
         dbHelper = DBHelper.getInstance(getApplicationContext());
-        List<String> accountName = dbHelper.getAccountName();
+        accountIdList = dbHelper.getAccountNameAndId();
+        for (AccountId account : accountIdList) {
+            if (accountName.equals(account.getAccountName())) {
+                return account.getAccountId();
+            }
+        }
+        return -1;
+    }
+
+    public String getAccountNameFromId(int id) {
+        dbHelper = DBHelper.getInstance(getApplicationContext());
+        accountIdList = dbHelper.getAccountNameAndId();
+        for (AccountId account : accountIdList) {
+            if (id == account.getAccountId()) {
+                return account.getAccountName();
+            }
+        }
+        return "";
+    }
+
+    String[] setExpenseAccount() {
+        dbHelper = DBHelper.getInstance(getApplicationContext());
+        accountIdList = dbHelper.getAccountNameAndId();
+        List<String> accountName = new ArrayList<>();
+        for (AccountId account : accountIdList) {
+            accountName.add(account.getAccountName());
+        }
+
         return accountName.toArray( new String[accountName.size()] );
     }
 
@@ -101,8 +130,8 @@ public class ExpenseEdit extends AppCompatActivity {
         return true;
     }
 
-    boolean checkExpenseMode(Spinner expenseMode){
-        return expenseMode.getAdapter().getCount() != 0;
+    boolean checkExpenseAccount(Spinner expenseAccount) {
+        return expenseAccount.getAdapter().getCount() != 0;
     }
     void watcher(final EditText expenseName, final EditText expenseAmount, final Button expenseSubmit){
         expenseName.addTextChangedListener(new TextWatcher() {
@@ -119,7 +148,7 @@ public class ExpenseEdit extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount) ){
-                    if( checkExpenseMode(expenseMode)){
+                    if (checkExpenseAccount(expenseAccount)) {
                         expenseSubmit.setEnabled(true);
                         expenseSubmit.setBackgroundColor(Color.GREEN); }
                     else {
@@ -148,7 +177,7 @@ public class ExpenseEdit extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if(checkExpenseName(expenseName) && checkExpenseAmount(expenseAmount)) {
-                    if (checkExpenseMode(expenseMode)) {
+                    if (checkExpenseAccount(expenseAccount)) {
                         expenseSubmit.setEnabled(true);
                         expenseSubmit.setBackgroundColor(Color.GREEN);
                     } else {
@@ -175,7 +204,7 @@ public class ExpenseEdit extends AppCompatActivity {
 
         adapterCategory = new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item, expenseCat);
 
-        expenseMode = (Spinner)findViewById(R.id.expenseMode);
+        expenseAccount = (Spinner) findViewById(R.id.expenseAccount);
         expenseCategory = (Spinner)findViewById(R.id.expenseCategory);
         expenseCategory.setAdapter(adapterCategory);
         expenseName = (EditText)findViewById(R.id.expenseName);
@@ -189,9 +218,9 @@ public class ExpenseEdit extends AppCompatActivity {
 
         expenseDate.setText(getCurrentDate());
         try {
-            expenseMod = setExpenseMode();
-            adapterMode = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, expenseMod);
-            expenseMode.setAdapter(adapterMode);
+            expenseAcc = setExpenseAccount();
+            adapterAccountMode = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, expenseAcc);
+            expenseAccount.setAdapter(adapterAccountMode);
         }catch (Exception e){
             Log.d(DEBUG_TAG,e.getMessage());
         }
@@ -205,9 +234,9 @@ public class ExpenseEdit extends AppCompatActivity {
             expenseName.setText(expenseDetail.getExpenseName());
             String expenseBalance = String.format(Locale.getDefault(),"%.2f",expenseDetail.getAmount());
             expenseAmount.setText(expenseBalance);
-            String expenseModeCompare = expenseDetail.getExpenseMode();
-            int spinnerPosition = adapterMode.getPosition(expenseModeCompare);
-            expenseMode.setSelection(spinnerPosition);
+            String expenseAccountCompare = getAccountNameFromId(expenseDetail.getExpenseAccount());
+            int spinnerPosition = adapterAccountMode.getPosition(expenseAccountCompare);
+            expenseAccount.setSelection(spinnerPosition);
             String expenseCategoryCompare = expenseDetail.getExpenseCategory();
             spinnerPosition = adapterCategory.getPosition(expenseCategoryCompare);
             expenseCategory.setSelection(spinnerPosition);
@@ -226,8 +255,7 @@ public class ExpenseEdit extends AppCompatActivity {
     }
     @Override
     public void onResume(){
-
-        Log.d(DEBUG_TAG,"Rechaed OnResume");
+        Log.d(DEBUG_TAG, "Reached OnResume");
         super.onResume();
     }
 
@@ -238,18 +266,20 @@ public class ExpenseEdit extends AppCompatActivity {
     }
     public void setExpenseSubmit(View v){
         boolean submit = true;
-        String mode = "";
+        String account = "";
+        int idOfAccount = -1;
         Log.d(DEBUG_TAG,"Reached Button Clicer for saving");
         String name = expenseName.getText().toString().trim();
         if(!checkExpenseName(expenseName)){
             submit = false;
             Snackbar.make(v, " Enter Expense name", Snackbar.LENGTH_SHORT).setAction("",null).show();
         }
-        if(!checkExpenseMode(expenseMode)){
+        if (!checkExpenseAccount(expenseAccount)) {
             submit=false;
 
         } else {
-           mode = expenseMode.getSelectedItem().toString();
+            idOfAccount = getAccountIdFromName(expenseAccount.getSelectedItem().toString());
+            account = expenseAccount.getSelectedItem().toString();
         }
         String category = expenseCategory.getSelectedItem().toString();
         String date = expenseDate.getText().toString();
@@ -281,9 +311,10 @@ public class ExpenseEdit extends AppCompatActivity {
             try {
 
                 dbHelper = DBHelper.getInstance(getApplicationContext());
-                AccountDetails newAccount = dbHelper.getAccountEntry(mode);
+                AccountDetails newAccount = dbHelper.getAccountEntry(idOfAccount);
+
                 if(type_expense==MainActivity.EXPENSE_ADD){
-                dbHelper.insertExpense(name, amount, category, mode, date, check);
+                    dbHelper.insertExpense(name, amount, category, idOfAccount, date, check);
                     if (check == 0) {
                         float balance = newAccount.getAccountBalance() - amount;
                         setAccount(newAccount,balance);
@@ -293,7 +324,7 @@ public class ExpenseEdit extends AppCompatActivity {
                     }
                 } else{
                     ExpenseDetail expenseDetail = dbHelper.getExpenseDetail(expenseIndex);
-                    AccountDetails previousAccount = dbHelper.getAccountEntry(expenseDetail.getExpenseMode());
+                    AccountDetails previousAccount = dbHelper.getAccountEntry(expenseDetail.getExpenseAccount());
                     float previousExpenseAmount = expenseDetail.getAmount();
                     int previouslyIncomeOrNot = expenseDetail.getCheckIncomeOrExpense();
                     float diff;
@@ -305,13 +336,13 @@ public class ExpenseEdit extends AppCompatActivity {
                         else
                             newAmount = prevAccountBalance - previousExpenseAmount;
                         setAccount(previousAccount, newAmount);
-                    newAccount = dbHelper.getAccountEntry(newAccount.getAccountName());
+                    newAccount = dbHelper.getAccountEntry(idOfAccount);
                     if (check == 0)
                         newAmount = newAccount.getAccountBalance() - amount;
                     else
                         newAmount= newAccount.getAccountBalance() + amount;
                     setAccount(newAccount,newAmount);
-                    dbHelper.updateExpense(expenseIndex,name, amount, category, mode, date, check);
+                    dbHelper.updateExpense(expenseIndex, name, amount, category, idOfAccount, date, check);
                 }
                 Snackbar.make(v, "Expense Added", Snackbar.LENGTH_SHORT).setAction("", null).show();
                 finish();

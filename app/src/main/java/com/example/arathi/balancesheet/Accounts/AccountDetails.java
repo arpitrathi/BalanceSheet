@@ -33,4 +33,23 @@ public class AccountDetails {
         return accountBalance;
     }
 
+    public static class AccountId {
+
+        int accountId;
+        String accountName;
+
+        public AccountId(int id, String name) {
+            accountId = id;
+            accountName = name;
+        }
+
+        public int getAccountId() {
+            return accountId;
+        }
+
+        public String getAccountName() {
+            return accountName;
+        }
+
+    }
 }

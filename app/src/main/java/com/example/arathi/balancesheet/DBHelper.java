@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.arathi.balancesheet.Accounts.AccountDetails;
+import com.example.arathi.balancesheet.Accounts.AccountDetails.AccountId;
 import com.example.arathi.balancesheet.expenses.ExpenseDetail;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import static com.example.arathi.balancesheet.FeedReaderContract.ExpenseEntry;
 
 
 public class DBHelper extends SQLiteOpenHelper {
+
     private static final String EXPENSE_TABLE =
             "CREATE TABLE " + ExpenseEntry.TABLE_NAME + " ( " +
                     ExpenseEntry.COLUMN_ID_NAME + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -26,11 +28,13 @@ public class DBHelper extends SQLiteOpenHelper {
                     ExpenseEntry.COLUMN_NAME3 + " TEXT, " +
                     ExpenseEntry.COLUMN_NAME4 + " TEXT, " +
                     ExpenseEntry.COLUMN_NAME5 + " TEXT, " +
-                    ExpenseEntry.COLUMN_NAME6 + " INTEGER NOT NULL CHECK ("+ ExpenseEntry.COLUMN_NAME6 +" IN (0,1) ) )";
+                    ExpenseEntry.COLUMN_NAME6 + " INTEGER NOT NULL CHECK (" + ExpenseEntry.COLUMN_NAME6 + " IN (0,1) )," +
+                    "FOREIGN KEY ( " + ExpenseEntry.COLUMN_NAME4 + " ) REFERENCES " + AccountEntry.TABLE_NAME + "( " + AccountEntry.COLUMN_ID_NAME + " ) )";
+
     private static final String ACCOUNTS_TABLE =
             "CREATE TABLE " + AccountEntry.TABLE_NAME + " ( " +
                     AccountEntry.COLUMN_ID_NAME + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    AccountEntry.COLUMN_NAME1 + " TEXT UNIQUE, " +
+                    AccountEntry.COLUMN_NAME1 + " TEXT, " +
                     AccountEntry.COLUMN_NAME2 + " TEXT, " +
                     AccountEntry.COLUMN_NAME3 + " TEXT ) ";
     private static final String SQL_DELETE_EXPENSE_TABLE =
@@ -84,13 +88,13 @@ public class DBHelper extends SQLiteOpenHelper {
     * Insert Data in database
     *
     * */
-    public boolean insertExpense(String name, float amount, String category, String mode, String date, int expinc){
+    public boolean insertExpense(String name, float amount, String category, int expenseAccount, String date, int expinc) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues value = new ContentValues();
         value.put(ExpenseEntry.COLUMN_NAME1, name);
         value.put(ExpenseEntry.COLUMN_NAME2, amount);
         value.put(ExpenseEntry.COLUMN_NAME3, category);
-        value.put(ExpenseEntry.COLUMN_NAME4, mode);
+        value.put(ExpenseEntry.COLUMN_NAME4, expenseAccount);
         value.put(ExpenseEntry.COLUMN_NAME5,date);
         value.put(ExpenseEntry.COLUMN_NAME6, expinc);
         long newRowId = db.insert(ExpenseEntry.TABLE_NAME,null,value);
@@ -144,13 +148,14 @@ public class DBHelper extends SQLiteOpenHelper {
             String name = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME1));
             float amount =  cursor.getFloat(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME2));
             String category = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME3));
-            String mode = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME4));
+            int expenseAccountId = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME4));
             String date = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME5));
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_ID_NAME));
             int checkinc = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME6));
 
 
-            ExpenseDetail item = new ExpenseDetail(id, name, amount, category, mode, date, checkinc) ;
+            ExpenseDetail item = new ExpenseDetail(id, name, amount, category, expenseAccountId, date, checkinc);
+            item.setAccountDetails(getAccountEntry(expenseAccountId));
             items.add(item);
         }
         cursor.close();
@@ -198,14 +203,15 @@ public class DBHelper extends SQLiteOpenHelper {
      * Update the Expense to some new value.
      */
 
-    public boolean updateExpense(int id, String name, float amount, String category, String mode, String date, int incomeOrNot){
+    public boolean updateExpense(int id, String name, float amount, String category, int expenseAccount,
+                                 String date, int incomeOrNot) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues value = new ContentValues();
         value.put(ExpenseEntry.COLUMN_NAME1, name);
         value.put(ExpenseEntry.COLUMN_NAME2, amount);
         value.put(ExpenseEntry.COLUMN_NAME3, category);
-        value.put(ExpenseEntry.COLUMN_NAME4, mode);
+        value.put(ExpenseEntry.COLUMN_NAME4, expenseAccount);
         value.put(ExpenseEntry.COLUMN_NAME5,date);
         value.put(ExpenseEntry.COLUMN_NAME6, incomeOrNot);
 
@@ -275,7 +281,44 @@ public class DBHelper extends SQLiteOpenHelper {
         return accountsName;
     }
 
-    public AccountDetails getAccountEntry(String name){
+    public List<AccountId> getAccountNameAndId() {
+        List<AccountId> accountsName = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                AccountEntry.COLUMN_ID_NAME,
+                AccountEntry.COLUMN_NAME1,
+        };
+
+        Cursor cursor = db.query(
+                AccountEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        try {
+            int len = cursor.getCount();
+
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+                AccountId acc = new AccountId(id, name);
+                accountsName.add(acc);
+            }
+        } catch (Exception e) {
+            Log.d("DBHelper", e.getMessage());
+        }
+
+        return accountsName;
+
+    }
+
+
+    public AccountDetails getAccountEntry(int accountId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection = {
@@ -285,8 +328,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 AccountEntry.COLUMN_NAME3
         };
 
-        String selection =  AccountEntry.COLUMN_NAME1 + " LIKE ?";
-        String[] selectionArgs = { name };
+        String selection = AccountEntry.COLUMN_ID_NAME + " = ?";
+        String[] selectionArgs = {String.valueOf(accountId),};
 
         Cursor cursor = db.query(
                 AccountEntry.TABLE_NAME,
@@ -302,6 +345,7 @@ public class DBHelper extends SQLiteOpenHelper {
         if(cursor.moveToNext()){
             float amount = cursor.getFloat(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_NAME3));
             String num = cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_NAME2));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_NAME1));
             int id1 = cursor.getInt(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_ID_NAME));
             item = new AccountDetails(id1, name, num, amount);
 
@@ -363,7 +407,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public ExpenseDetail getExpenseDetail(int id){
         float amount;
         String name;
-        String category, mode;
+        String category;
+        int account;
         int incornot;
         String date;
 
@@ -395,10 +440,10 @@ public class DBHelper extends SQLiteOpenHelper {
             amount= cursor.getFloat(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME2));
             name = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME1));
             category = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME3));
-            mode = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME4));
+            account = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME4));
             date = cursor.getString(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME5));
             incornot = cursor.getInt(cursor.getColumnIndexOrThrow(ExpenseEntry.COLUMN_NAME6));
-            expenseDetail = new ExpenseDetail(id,name,amount,category,mode,date,incornot);
+            expenseDetail = new ExpenseDetail(id, name, amount, category, account, date, incornot);
         }
         return expenseDetail;
     }

@@ -16,7 +16,7 @@ final class FeedReaderContract {
         static final String COLUMN_NAME1 = "expenseName";
         static final String COLUMN_NAME2 = "expenseAmount";
         static final String COLUMN_NAME3 = "expenseCategory";
-        static final String COLUMN_NAME4 = "expenseMode";
+        static final String COLUMN_NAME4 = "expenseAccount";
         static final String COLUMN_NAME5 = "expenseDate";
         static final String COLUMN_NAME6 = "expenseOrIncome";
 

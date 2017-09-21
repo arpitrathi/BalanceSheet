@@ -55,7 +55,7 @@
             android:textSize="20sp"
             />
         <TextView
-            android:id="@+id/expenseMode"
+            android:id="@+id/expenseAccount"
             android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
